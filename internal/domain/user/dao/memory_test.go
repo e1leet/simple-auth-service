@@ -2,10 +2,16 @@ package dao
 
 import (
 	"context"
+	"io"
 	"testing"
 
+	"github.com/rs/zerolog/log"
 	"github.com/stretchr/testify/assert"
 )
+
+func init() {
+	log.Logger = log.Output(io.Discard)
+}
 
 func TestMemoryDAO_Create(t *testing.T) {
 	t.Run("create", func(t *testing.T) {
