@@ -1,6 +1,8 @@
 package config
 
 import (
+	"io"
+	"log"
 	"os"
 	"testing"
 	"time"
@@ -10,6 +12,10 @@ import (
 
 const testDataFolder = "testdata/"
 
+func init() {
+	log.SetOutput(io.Discard)
+}
+
 func TestLoadConfig(t *testing.T) {
 	t.Run("non_existent_file", func(t *testing.T) {
 		_, err := LoadConfig("dfklajflkjd")
@@ -17,13 +23,16 @@ func TestLoadConfig(t *testing.T) {
 	})
 
 	t.Run("load_config_yaml", func(t *testing.T) {
-		expected := &Config{Server: ServerConfig{
-			Host:            "127.0.0.1",
-			Port:            5000,
-			ShutdownTimeout: 10 * time.Second,
-			IsProduction:    true,
-			Addr:            "127.0.0.1:5000",
-		}}
+		expected := &Config{
+			Server: ServerConfig{
+				Host:            "127.0.0.1",
+				Port:            5000,
+				ShutdownTimeout: 10 * time.Second,
+				IsProduction:    true,
+				Addr:            "127.0.0.1:5000",
+			},
+			Log: LogConfig{Level: "debug"},
+		}
 		actual, err := LoadConfig(testDataFolder + "correct.yaml")
 
 		assert.NoError(t, err)

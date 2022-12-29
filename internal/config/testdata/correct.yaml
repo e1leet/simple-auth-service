@@ -3,3 +3,5 @@ server:
   port: 5000
   shutdown_timeout: 10s
   is_production: true
+log:
+  level: debug
