@@ -16,8 +16,13 @@ type ServerConfig struct {
 	Addr            string
 }
 
+type LogConfig struct {
+	Level string `yaml:"level" env-default:"trace"`
+}
+
 type Config struct {
 	Server ServerConfig `yaml:"server"`
+	Log    LogConfig    `yaml:"log"`
 }
 
 func (c *Config) Update() error {
