@@ -34,6 +34,7 @@ func TestLoadConfig(t *testing.T) {
 			Log: LogConfig{Level: "debug"},
 			Security: SecurityConfig{
 				PasswordSalt:     "something",
+				JWTSecret:        "amazing",
 				AccessExpiresIn:  time.Minute * 5,
 				RefreshExpiresIn: time.Hour * 24 * 30,
 			},

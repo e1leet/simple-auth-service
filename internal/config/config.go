@@ -22,6 +22,7 @@ type LogConfig struct {
 
 type SecurityConfig struct {
 	PasswordSalt     string        `yaml:"password_salt" env-default:"salt"`
+	JWTSecret        string        `yaml:"jwt_secret" env-default:"secret"`
 	AccessExpiresIn  time.Duration `yaml:"access_expires_in" env-default:"30m"`
 	RefreshExpiresIn time.Duration `yaml:"refresh_expires_in" env-default:"1440h"`
 }
