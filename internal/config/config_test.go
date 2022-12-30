@@ -32,6 +32,11 @@ func TestLoadConfig(t *testing.T) {
 				Addr:            "127.0.0.1:5000",
 			},
 			Log: LogConfig{Level: "debug"},
+			Security: SecurityConfig{
+				PasswordSalt:     "something",
+				AccessExpiresIn:  time.Minute * 5,
+				RefreshExpiresIn: time.Hour * 24 * 30,
+			},
 		}
 		actual, err := LoadConfig(testDataFolder + "correct.yaml")
 

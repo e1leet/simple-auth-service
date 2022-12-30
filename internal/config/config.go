@@ -20,9 +20,16 @@ type LogConfig struct {
 	Level string `yaml:"level" env-default:"trace"`
 }
 
+type SecurityConfig struct {
+	PasswordSalt     string        `yaml:"password_salt" env-default:"salt"`
+	AccessExpiresIn  time.Duration `yaml:"access_expires_in" env-default:"30m"`
+	RefreshExpiresIn time.Duration `yaml:"refresh_expires_in" env-default:"1440h"`
+}
+
 type Config struct {
-	Server ServerConfig `yaml:"server"`
-	Log    LogConfig    `yaml:"log"`
+	Server   ServerConfig   `yaml:"server"`
+	Log      LogConfig      `yaml:"log"`
+	Security SecurityConfig `yaml:"security"`
 }
 
 func (c *Config) Update() error {
