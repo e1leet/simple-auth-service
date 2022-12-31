@@ -7,4 +7,5 @@ type DAO interface {
 	GetByID(ctx context.Context, id int) (*SessionStorage, error)
 	GetByToken(ctx context.Context, token string) (*SessionStorage, error)
 	DeleteByID(ctx context.Context, id int) error
+	DeleteByToken(ctx context.Context, token string) error
 }

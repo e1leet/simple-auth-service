@@ -76,3 +76,19 @@ func (s *memoryDAO) DeleteByID(ctx context.Context, id int) error {
 
 	return nil
 }
+
+func (s *memoryDAO) DeleteByToken(ctx context.Context, token string) error {
+	s.logger.Info().Msg("delete by token")
+
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	for _, session := range s.sessions {
+		if session.Token == token {
+			delete(s.sessions, session.ID)
+			return nil
+		}
+	}
+
+	return nil
+}

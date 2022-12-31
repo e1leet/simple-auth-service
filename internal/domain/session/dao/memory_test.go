@@ -2,10 +2,16 @@ package dao
 
 import (
 	"context"
+	"io"
 	"testing"
 
+	"github.com/rs/zerolog/log"
 	"github.com/stretchr/testify/assert"
 )
+
+func init() {
+	log.Logger = log.Output(io.Discard)
+}
 
 func TestMemoryDAO_Create(t *testing.T) {
 	t.Run("create", func(t *testing.T) {
@@ -72,6 +78,24 @@ func TestMemoryDAO_DeleteByID(t *testing.T) {
 		assert.NoError(t, err)
 
 		err = dao.DeleteByID(context.Background(), id)
+		assert.NoError(t, err)
+
+		_, err = dao.GetByID(context.Background(), id)
+		assert.ErrorIs(t, err, ErrSessionNotFound)
+	})
+}
+
+func TestMemoryDAO_DeleteByToken(t *testing.T) {
+	t.Run("existing", func(t *testing.T) {
+		dao := NewMemory()
+		session := &SessionStorage{
+			ExpiresIn: 123,
+			UserID:    1,
+		}
+		id, err := dao.Create(context.Background(), session)
+		assert.NoError(t, err)
+
+		err = dao.DeleteByToken(context.Background(), session.Token)
 		assert.NoError(t, err)
 
 		_, err = dao.GetByID(context.Background(), id)
