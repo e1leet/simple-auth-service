@@ -3,14 +3,20 @@ package service
 import (
 	"context"
 	"fmt"
+	"io"
 	"testing"
 	"time"
 
 	sessionDAO "github.com/e1leet/simple-auth-service/internal/domain/session/dao"
 	"github.com/golang-jwt/jwt/v4"
+	"github.com/rs/zerolog/log"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )
+
+func init() {
+	log.Logger = log.Output(io.Discard)
+}
 
 func TestService_CreateAccessToken(t *testing.T) {
 	for _, userID := range []int{1, 2, 3, 4} {

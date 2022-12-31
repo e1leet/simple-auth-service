@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"io"
 	"testing"
 
 	jwtService "github.com/e1leet/simple-auth-service/internal/domain/jwt/service"
@@ -9,9 +10,14 @@ import (
 	"github.com/e1leet/simple-auth-service/internal/domain/user"
 	userDAO "github.com/e1leet/simple-auth-service/internal/domain/user/dao"
 	"github.com/e1leet/simple-auth-service/internal/utils/password/manager"
+	"github.com/rs/zerolog/log"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )
+
+func init() {
+	log.Logger = log.Output(io.Discard)
+}
 
 func TestService_Register(t *testing.T) {
 	t.Run("register", func(t *testing.T) {
