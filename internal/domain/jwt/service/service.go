@@ -14,7 +14,7 @@ import (
 type Service interface {
 	CreateAccessToken(userID int) (AccessToken, error)
 	CreateRefreshToken(ctx context.Context, userID int) (RefreshToken, error)
-	RecreateRefreshToken(ctx context.Context, userID int, refresh RefreshToken) (RefreshToken, error)
+	RecreateRefreshToken(ctx context.Context, userID int, refresh string) (RefreshToken, error)
 }
 
 type service struct {
@@ -38,9 +38,11 @@ func New(dao sessionDAO.DAO, jwtSecret string, accessExpiresIn time.Duration, re
 func (s *service) CreateAccessToken(userID int) (AccessToken, error) {
 	s.logger.Info().Int("userID", userID).Msg("create access token")
 
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"user_id": userID,
-		"exp":     time.Now().Add(s.accessExpiresIn).Unix(),
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, &Claims{
+		UserID: userID,
+		RegisteredClaims: jwt.RegisteredClaims{
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(s.accessExpiresIn)),
+		},
 	})
 
 	access, err := token.SignedString([]byte(s.jwtSecret))
@@ -62,29 +64,29 @@ func (s *service) CreateRefreshToken(ctx context.Context, userID int) (RefreshTo
 
 	if _, err := s.sessionDAO.Create(ctx, session); err != nil {
 		s.logger.Err(err).Send()
-		return "", fmt.Errorf("failed to create refresh token: %w", err)
+		return RefreshToken{}, fmt.Errorf("failed to create refresh token: %w", err)
 	}
 
-	return RefreshToken(session.Token), nil
+	return NewRefreshToken(session.Token, session.ExpiresIn), nil
 }
 
-func (s *service) RecreateRefreshToken(ctx context.Context, userID int, refresh RefreshToken) (RefreshToken, error) {
+func (s *service) RecreateRefreshToken(ctx context.Context, userID int, refresh string) (RefreshToken, error) {
 	s.logger.Info().Int("userID", userID).Msg("recreate refresh token")
 
-	session, err := s.sessionDAO.GetByToken(ctx, string(refresh))
+	session, err := s.sessionDAO.GetByToken(ctx, refresh)
 	if err != nil {
 		s.logger.Err(err).Send()
-		return "", fmt.Errorf("failed to recreate refresh token: %w", err)
+		return RefreshToken{}, fmt.Errorf("failed to recreate refresh token: %w", err)
 	}
 
 	if session.ExpiresIn < time.Now().Unix() {
-		return "", fmt.Errorf("failed to recreate refresh token: %w", ErrRefreshTokenExpired)
+		return RefreshToken{}, fmt.Errorf("failed to recreate refresh token: %w", ErrRefreshTokenExpired)
 	}
 
 	newRefresh, err := s.CreateRefreshToken(ctx, userID)
 	if err != nil {
 		s.logger.Err(err).Send()
-		return "", fmt.Errorf("failed to recreate access token: %w", err)
+		return RefreshToken{}, fmt.Errorf("failed to recreate access token: %w", err)
 	}
 
 	return newRefresh, nil

@@ -99,7 +99,7 @@ func TestService_Login(t *testing.T) {
 		passwordMock.On("CheckPassword", mock.Anything, mock.Anything).Return(true)
 
 		jwtMock := jwtService.NewMock()
-		expectedRefresh := jwtService.RefreshToken("wow")
+		expectedRefresh := jwtService.NewRefreshToken("wow", 123)
 		jwtMock.
 			On("CreateRefreshToken", mock.Anything, mock.Anything).
 			Return(expectedRefresh, nil)
@@ -124,7 +124,7 @@ func TestService_UpdateAccessToken(t *testing.T) {
 		jwtMock := jwtService.NewMock()
 		jwtMock.
 			On("RecreateRefreshToken", mock.Anything, mock.Anything, mock.Anything).
-			Return(jwtService.RefreshToken(""), sessionDAO.ErrSessionNotFound)
+			Return(jwtService.RefreshToken{}, sessionDAO.ErrSessionNotFound)
 		s := New(jwtMock, nil, nil, nil)
 
 		_, _, err := s.UpdateAccessToken(context.Background(), 123, "123")
@@ -135,7 +135,7 @@ func TestService_UpdateAccessToken(t *testing.T) {
 		jwtMock := jwtService.NewMock()
 		jwtMock.
 			On("RecreateRefreshToken", mock.Anything, mock.Anything, mock.Anything).
-			Return(jwtService.RefreshToken(""), jwtService.ErrRefreshTokenExpired)
+			Return(jwtService.RefreshToken{}, jwtService.ErrRefreshTokenExpired)
 
 		s := New(jwtMock, nil, nil, nil)
 
@@ -145,7 +145,7 @@ func TestService_UpdateAccessToken(t *testing.T) {
 
 	t.Run("update_access_token", func(t *testing.T) {
 		jwtMock := jwtService.NewMock()
-		expectedRefresh := jwtService.RefreshToken("test")
+		expectedRefresh := jwtService.NewRefreshToken("test", 123)
 		jwtMock.
 			On("RecreateRefreshToken", mock.Anything, mock.Anything, mock.Anything).
 			Return(expectedRefresh, nil)

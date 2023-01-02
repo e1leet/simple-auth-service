@@ -19,9 +19,9 @@ type Service interface {
 	UpdateAccessToken(
 		ctx context.Context,
 		userID int,
-		refresh jwtService.RefreshToken,
+		refresh string,
 	) (jwtService.AccessToken, jwtService.RefreshToken, error)
-	Logout(ctx context.Context, refresh jwtService.RefreshToken) error
+	Logout(ctx context.Context, refresh string) error
 }
 
 type service struct {
@@ -61,28 +61,28 @@ func (s *service) Login(ctx context.Context, u *user.User) (jwtService.AccessTok
 		switch err {
 		case userDAO.ErrUserNotFound:
 			s.logger.Warn().Str("username", u.Username).Err(userDAO.ErrUserNotFound).Send()
-			return "", "", fmt.Errorf("failed to login: %w", err)
+			return "", jwtService.RefreshToken{}, fmt.Errorf("failed to login: %w", err)
 		default:
 			s.logger.Err(err).Send()
-			return "", "", err
+			return "", jwtService.RefreshToken{}, err
 		}
 	}
 
 	if !s.passwordManager.CheckPassword(u.Password, got.Password) {
 		s.logger.Warn().Str("username", u.Username).Err(ErrIncorrectPassword).Send()
-		return "", "", fmt.Errorf("failed to login: %w", ErrIncorrectPassword)
+		return "", jwtService.RefreshToken{}, fmt.Errorf("failed to login: %w", ErrIncorrectPassword)
 	}
 
 	refresh, err := s.jwtService.CreateRefreshToken(ctx, got.ID)
 	if err != nil {
 		s.logger.Err(err).Send()
-		return "", "", fmt.Errorf("failed to login: %w", err)
+		return "", jwtService.RefreshToken{}, fmt.Errorf("failed to login: %w", err)
 	}
 
 	access, err := s.jwtService.CreateAccessToken(got.ID)
 	if err != nil {
 		s.logger.Err(err).Send()
-		return "", "", fmt.Errorf("failed to login: %w", err)
+		return "", jwtService.RefreshToken{}, fmt.Errorf("failed to login: %w", err)
 	}
 
 	return access, refresh, nil
@@ -91,25 +91,25 @@ func (s *service) Login(ctx context.Context, u *user.User) (jwtService.AccessTok
 func (s *service) UpdateAccessToken(
 	ctx context.Context,
 	userID int,
-	refresh jwtService.RefreshToken,
+	refresh string,
 ) (jwtService.AccessToken, jwtService.RefreshToken, error) {
 	newRefresh, err := s.jwtService.RecreateRefreshToken(ctx, userID, refresh)
 	if err != nil {
 		s.logger.Err(err).Send()
-		return "", "", fmt.Errorf("failed to update access token: %w", err)
+		return "", jwtService.RefreshToken{}, fmt.Errorf("failed to update access token: %w", err)
 	}
 
 	newAccess, err := s.jwtService.CreateAccessToken(userID)
 	if err != nil {
 		s.logger.Err(err).Send()
-		return "", "", fmt.Errorf("failed to update access token: %w", err)
+		return "", jwtService.RefreshToken{}, fmt.Errorf("failed to update access token: %w", err)
 	}
 
 	return newAccess, newRefresh, nil
 }
 
-func (s *service) Logout(ctx context.Context, refresh jwtService.RefreshToken) error {
-	if err := s.sessionDAO.DeleteByToken(ctx, string(refresh)); err != nil {
+func (s *service) Logout(ctx context.Context, refresh string) error {
+	if err := s.sessionDAO.DeleteByToken(ctx, refresh); err != nil {
 		return fmt.Errorf("failed to logout: %w", err)
 	}
 

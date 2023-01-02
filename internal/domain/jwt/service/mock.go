@@ -24,7 +24,7 @@ func (s *MockService) CreateRefreshToken(ctx context.Context, userID int) (Refre
 	return args.Get(0).(RefreshToken), args.Error(1)
 }
 
-func (s *MockService) RecreateRefreshToken(ctx context.Context, userID int, refresh RefreshToken) (RefreshToken, error) {
+func (s *MockService) RecreateRefreshToken(ctx context.Context, userID int, refresh string) (RefreshToken, error) {
 	args := s.Called(ctx, userID, refresh)
 	return args.Get(0).(RefreshToken), args.Error(1)
 }
