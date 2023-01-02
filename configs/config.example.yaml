@@ -5,3 +5,8 @@ server:
   is_production: false
 log:
   level: trace
+security:
+  password_salt: something
+  jwt_secret: amazing
+  access_expires_in: 5m
+  refresh_expires_in: 720h

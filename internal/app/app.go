@@ -6,6 +6,12 @@ import (
 	"net/http"
 
 	"github.com/e1leet/simple-auth-service/internal/config"
+	"github.com/e1leet/simple-auth-service/internal/domain/auth/service"
+	jwtService "github.com/e1leet/simple-auth-service/internal/domain/jwt/service"
+	sessionDAO "github.com/e1leet/simple-auth-service/internal/domain/session/dao"
+	userDAO "github.com/e1leet/simple-auth-service/internal/domain/user/dao"
+	"github.com/e1leet/simple-auth-service/internal/transport/handlers/auth"
+	"github.com/e1leet/simple-auth-service/internal/utils/password/manager"
 	"github.com/e1leet/simple-auth-service/pkg/shutdown"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
@@ -28,6 +34,20 @@ func New(cfg *config.Config) *App {
 
 	// TODO Create zerolog logger middleware
 	r.Use(middleware.AllowContentType("application/json"))
+
+	usr := userDAO.NewMemory()
+	session := sessionDAO.NewMemory()
+	password := manager.New(cfg.Security.PasswordSalt)
+	jwt := jwtService.New(
+		session,
+		cfg.Security.JWTSecret,
+		cfg.Security.AccessExpiresIn,
+		cfg.Security.RefreshExpiresIn,
+	)
+	authService := service.New(jwt, usr, session, password)
+
+	authHandler := auth.New(authService, cfg)
+	authHandler.RegisterRoutes(r)
 
 	return &App{
 		srv: http.Server{
