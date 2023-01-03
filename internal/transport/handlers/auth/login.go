@@ -11,6 +11,18 @@ import (
 	"github.com/go-chi/render"
 )
 
+// Login godoc
+//
+//	@Summary		Login user
+//	@Description	login user
+//	@Tags			auth
+//	@Accept			json
+//	@Produce		json
+//	@Param			data	body		LoginRequest	true	"data for login"
+//	@Success		200		{object}	TokenResponse
+//	@Failure		403		{object}	api.ErrorResponse
+//	@Failure		500		{object}	api.ErrorResponse
+//	@Router			/auth/login [post]
 func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
 	request := &LoginRequest{}
 

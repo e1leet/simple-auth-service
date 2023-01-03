@@ -17,6 +17,7 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
+	httpSwagger "github.com/swaggo/http-swagger"
 )
 
 type App struct {
@@ -34,6 +35,11 @@ func New(cfg *config.Config) *App {
 
 	// TODO Create zerolog logger middleware
 	r.Use(middleware.AllowContentType("application/json"))
+
+	r.Get("/swagger/*", httpSwagger.WrapHandler)
+	r.Get("/swagger", func(w http.ResponseWriter, r *http.Request) {
+		http.Redirect(w, r, "/swagger/index.html", http.StatusMovedPermanently)
+	})
 
 	usr := userDAO.NewMemory()
 	session := sessionDAO.NewMemory()

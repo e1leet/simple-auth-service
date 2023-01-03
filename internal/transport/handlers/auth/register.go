@@ -9,6 +9,18 @@ import (
 	"github.com/go-chi/render"
 )
 
+// Register godoc
+//
+//	@Summary		Register user
+//	@Description	register user
+//	@Tags			auth
+//	@Accept			json
+//	@Produce		json
+//	@Param			data	body	RegisterRequest	true	"data for register"
+//	@Success		201
+//	@Failure		422	{object}	api.ErrorResponse
+//	@Failure		500	{object}	api.ErrorResponse
+//	@Router			/auth/register [post]
 func (h *Handler) Register(w http.ResponseWriter, r *http.Request) {
 	request := &RegisterRequest{}
 
@@ -20,6 +32,8 @@ func (h *Handler) Register(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := h.authService.Register(r.Context(), request.ToDomain()); err != nil {
+		h.logger.Error().Err(err).Send()
+
 		var response render.Renderer
 
 		switch {

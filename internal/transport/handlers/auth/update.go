@@ -11,6 +11,15 @@ import (
 	"github.com/go-chi/render"
 )
 
+// RefreshToken godoc
+//
+//	@Summary		Refresh token
+//	@Description	Recreate access and refresh token
+//	@Tags			auth
+//	@Success		200	{object}	TokenResponse
+//	@Failure		500	{object}	api.ErrorResponse
+//	@Router			/auth/refresh-tokens [post]
+//	@Security		ApiKeyAuth
 func (h *Handler) RefreshToken(w http.ResponseWriter, r *http.Request) {
 	authHeader := r.Header.Get("Authorization")
 
@@ -22,12 +31,16 @@ func (h *Handler) RefreshToken(w http.ResponseWriter, r *http.Request) {
 
 	refreshCookie, err := r.Cookie("refreshToken")
 	if err != nil {
+		h.logger.Error().Err(err).Send()
 		_ = render.Render(w, r, api.NewErrorResponse(err.Error(), http.StatusUnauthorized))
+
 		return
 	}
 
 	access, refresh, err := h.authService.UpdateAccessToken(r.Context(), claims.UserID, refreshCookie.Value)
 	if err != nil {
+		h.logger.Error().Err(err).Send()
+
 		var response render.Renderer
 
 		switch {
