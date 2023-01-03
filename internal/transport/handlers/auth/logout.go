@@ -10,6 +10,14 @@ import (
 	"github.com/go-chi/render"
 )
 
+// Logout godoc
+//
+//	@Summary		Logout user
+//	@Description	logout user
+//	@Tags			auth
+//	@Success		200
+//	@Failure		500	{object}	api.ErrorResponse
+//	@Router			/auth/logout [delete]
 func (h *Handler) Logout(w http.ResponseWriter, r *http.Request) {
 	refreshToken, err := r.Cookie(config.RefreshCookieName)
 	if err != nil {

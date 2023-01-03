@@ -11,3 +11,7 @@ lint:
 .PHONY: test
 test:
 	go test -v --race --timeout=5m --cover ./...
+
+.PHONY: swagger
+swagger:
+	swag init -g ./cmd/app/main.go
