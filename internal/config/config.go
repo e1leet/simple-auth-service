@@ -53,6 +53,7 @@ func (c *Config) Update() error {
 		c.Postgres.Port,
 		c.Postgres.Database,
 	)
+
 	return nil
 }
 
