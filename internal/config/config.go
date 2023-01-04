@@ -27,14 +27,33 @@ type SecurityConfig struct {
 	RefreshExpiresIn time.Duration `yaml:"refresh_expires_in" env-default:"1440h"`
 }
 
+type PostgresConfig struct {
+	Username string `yaml:"username" env-default:"postgres"`
+	Password string `yaml:"password" env-default:"postgres"`
+	Host     string `yaml:"host" env-default:"localhost"`
+	Port     int    `yaml:"port" env-default:"5432"`
+	Database string `yaml:"database" env-default:"postgres"`
+	URI      string
+}
+
 type Config struct {
 	Server   ServerConfig   `yaml:"server"`
 	Log      LogConfig      `yaml:"log"`
 	Security SecurityConfig `yaml:"security"`
+	Postgres PostgresConfig `yaml:"postgres"`
 }
 
 func (c *Config) Update() error {
 	c.Server.Addr = fmt.Sprintf("%s:%d", c.Server.Host, c.Server.Port)
+	c.Postgres.URI = fmt.Sprintf(
+		"postgresql://%s:%s@%s:%d/%s",
+		c.Postgres.Username,
+		c.Postgres.Password,
+		c.Postgres.Host,
+		c.Postgres.Port,
+		c.Postgres.Database,
+	)
+
 	return nil
 }
 

@@ -12,6 +12,7 @@ import (
 	userDAO "github.com/e1leet/simple-auth-service/internal/domain/user/dao"
 	"github.com/e1leet/simple-auth-service/internal/transport/handlers/auth"
 	"github.com/e1leet/simple-auth-service/internal/utils/password/manager"
+	"github.com/e1leet/simple-auth-service/pkg/client/postgresql"
 	"github.com/e1leet/simple-auth-service/pkg/shutdown"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
@@ -31,6 +32,8 @@ func New(cfg *config.Config) *App {
 	logger := log.With().Str("component", "app").Logger()
 	logger.Info().Msg("create app")
 
+	closer := &shutdown.Closer{}
+
 	r := chi.NewRouter()
 
 	// TODO Create zerolog logger middleware
@@ -41,7 +44,17 @@ func New(cfg *config.Config) *App {
 		http.Redirect(w, r, "/swagger/index.html", http.StatusMovedPermanently)
 	})
 
-	usr := userDAO.NewMemory()
+	postgresClient, err := postgresql.NewClient(context.Background(), cfg.Postgres.URI, 5)
+	if err != nil {
+		logger.Fatal().Err(err).Send()
+	}
+
+	closer.Add(func(ctx context.Context) error {
+		postgresClient.Close()
+		return nil
+	})
+
+	usr := userDAO.NewPostgresql(postgresClient)
 	session := sessionDAO.NewMemory()
 	password := manager.New(cfg.Security.PasswordSalt)
 	jwt := jwtService.New(
@@ -61,7 +74,7 @@ func New(cfg *config.Config) *App {
 			Handler: r,
 		},
 		cfg:    cfg,
-		closer: &shutdown.Closer{},
+		closer: closer,
 		logger: logger,
 	}
 }

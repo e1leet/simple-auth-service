@@ -10,3 +10,9 @@ security:
   jwt_secret: amazing
   access_expires_in: 5m
   refresh_expires_in: 720h
+postgres:
+  username: postgre
+  password: postgre
+  host: 127.0.0.1
+  port: 2345
+  database: postgre
