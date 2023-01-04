@@ -1,4 +1,5 @@
 CONFIG_PATH = ./configs/config.local.yaml
+POSTGRES_URI = "postgresql://postgres:postgres@localhost:5432/postgres?sslmode=disable"
 
 .PHONY: run
 run:
@@ -15,3 +16,16 @@ test:
 .PHONY: swagger
 swagger:
 	swag init -g ./cmd/app/main.go
+
+.PHONY: migrate
+migrate:
+	migrate -path migrations/ -database $(POSTGRES_URI) -version $(version)
+
+.PHONY: migrate.up
+migrate.up:
+	migrate -path migrations/ -database $(POSTGRES_URI) up
+
+.PHONY: migrate.down
+migrate.down:
+	migrate -path migrations/ -database $(POSTGRES_URI) down
+
