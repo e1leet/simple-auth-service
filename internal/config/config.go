@@ -46,7 +46,7 @@ type Config struct {
 func (c *Config) Update() error {
 	c.Server.Addr = fmt.Sprintf("%s:%d", c.Server.Host, c.Server.Port)
 	c.Postgres.URI = fmt.Sprintf(
-		"postgresql://%s:%s@%s:%d/%s",
+		"postgresql://%s:%s@%s:%d/%s?sslmode=disable",
 		c.Postgres.Username,
 		c.Postgres.Password,
 		c.Postgres.Host,

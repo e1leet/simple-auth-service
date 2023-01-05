@@ -44,7 +44,7 @@ func TestLoadConfig(t *testing.T) {
 				Host:     "127.0.0.1",
 				Port:     2345,
 				Database: "postgre",
-				URI:      "postgresql://postgre:postgre@127.0.0.1:2345/postgre",
+				URI:      "postgresql://postgre:postgre@127.0.0.1:2345/postgre?sslmode=disable",
 			},
 		}
 		actual, err := LoadConfig(testDataFolder + "correct.yaml")
