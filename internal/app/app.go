@@ -11,6 +11,7 @@ import (
 	sessionDAO "github.com/e1leet/simple-auth-service/internal/domain/session/dao"
 	userDAO "github.com/e1leet/simple-auth-service/internal/domain/user/dao"
 	"github.com/e1leet/simple-auth-service/internal/transport/handlers/auth"
+	"github.com/e1leet/simple-auth-service/internal/transport/middlewares"
 	"github.com/e1leet/simple-auth-service/internal/utils/password/manager"
 	"github.com/e1leet/simple-auth-service/pkg/client/postgresql"
 	"github.com/e1leet/simple-auth-service/pkg/shutdown"
@@ -36,8 +37,8 @@ func New(cfg *config.Config) *App {
 
 	r := chi.NewRouter()
 
-	// TODO Create zerolog logger middleware
 	r.Use(middleware.AllowContentType("application/json"))
+	r.Use(middlewares.LoggerMiddleware())
 
 	r.Get("/swagger/*", httpSwagger.WrapHandler)
 	r.Get("/swagger", func(w http.ResponseWriter, r *http.Request) {
