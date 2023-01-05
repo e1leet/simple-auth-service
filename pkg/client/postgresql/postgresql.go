@@ -34,7 +34,8 @@ func NewClient(ctx context.Context, uri string, maxAttempts int) (pool *pgxpool.
 	}, maxAttempts, 5*time.Second)
 
 	if err != nil {
-		logger.Fatal().Err(err).Msg("error do with tries")
+		logger.Error().Err(err).Send()
+		return nil, err
 	}
 
 	return pool, nil
